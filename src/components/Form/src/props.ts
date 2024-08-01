@@ -1,15 +1,16 @@
 import type { FieldMapToTime, FormSchema } from './types/form';
 import type { CSSProperties, PropType } from 'vue';
 import type { ColEx } from './types';
-import type { TableActionType } from '/@/components/Table';
-import type { ButtonProps } from 'ant-design-vue/es/button/buttonTypes';
+import type { TableActionType } from '@/components/Table';
 import type { RowProps } from 'ant-design-vue/lib/grid/Row';
-import { propTypes } from '/@/utils/propTypes';
+import { propTypes } from '@/utils/propTypes';
+
+import { ButtonProps } from '@/components/Button';
 
 export const basicProps = {
   model: {
     type: Object as PropType<Recordable>,
-    default: {},
+    default: () => ({}),
   },
   // 标签宽度  固定宽度
   labelWidth: {
@@ -23,7 +24,7 @@ export const basicProps = {
   compact: propTypes.bool,
   // 表单配置规则
   schemas: {
-    type: [Array] as PropType<FormSchema[]>,
+    type: Array as PropType<FormSchema[]>,
     default: () => [],
   },
   mergeDynamicData: {
@@ -45,7 +46,7 @@ export const basicProps = {
   // 禁用表单
   disabled: propTypes.bool,
   emptySpan: {
-    type: [Number, Object] as PropType<number>,
+    type: [Number, Object] as PropType<number | Recordable>,
     default: 0,
   },
   // 是否显示收起展开按钮

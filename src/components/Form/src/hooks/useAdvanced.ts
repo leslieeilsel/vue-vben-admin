@@ -1,10 +1,9 @@
 import type { ColEx } from '../types';
 import type { AdvanceState } from '../types/hooks';
-import { ComputedRef, getCurrentInstance, Ref } from 'vue';
-import type { FormProps, FormSchema } from '../types/form';
-import { computed, unref, watch } from 'vue';
-import { isBoolean, isFunction, isNumber, isObject } from '/@/utils/is';
-import { useBreakpoint } from '/@/hooks/event/useBreakpoint';
+import { ComputedRef, getCurrentInstance, Ref, shallowReactive, computed, unref, watch } from 'vue';
+import type { FormProps, FormSchemaInner as FormSchema } from '../types/form';
+import { isBoolean, isFunction, isNumber, isObject } from '@/utils/is';
+import { useBreakpoint } from '@/hooks/event/useBreakpoint';
 import { useDebounceFn } from '@vueuse/core';
 
 const BASIC_COL_LEN = 24;
@@ -113,30 +112,26 @@ export default function ({
     }
   }
 
+  const fieldsIsAdvancedMap = shallowReactive({});
+
   function updateAdvanced() {
     let itemColSum = 0;
     let realItemColSum = 0;
     const { baseColProps = {} } = unref(getProps);
 
     for (const schema of unref(getSchema)) {
-      const { show, colProps } = schema;
+      const { show, ifShow, colProps } = schema;
+      const renderCallbackParams = {
+        schema: schema,
+        model: formModel,
+        field: schema.field,
+        values: { ...unref(defaultValueRef), ...formModel },
+      };
       let isShow = true;
-
-      if (isBoolean(show)) {
-        isShow = show;
-      }
-
-      if (isFunction(show)) {
-        isShow = show({
-          schema: schema,
-          model: formModel,
-          field: schema.field,
-          values: {
-            ...unref(defaultValueRef),
-            ...formModel,
-          },
-        });
-      }
+      isShow && isBoolean(ifShow) && (isShow = ifShow);
+      isShow && isFunction(ifShow) && (isShow = ifShow(renderCallbackParams));
+      isShow && isBoolean(show) && (isShow = show);
+      isShow && isFunction(show) && (isShow = show(renderCallbackParams));
 
       if (isShow && (colProps || baseColProps)) {
         const { itemColSum: sum, isAdvanced } = getAdvanced(
@@ -148,7 +143,7 @@ export default function ({
         if (isAdvanced) {
           realItemColSum = itemColSum;
         }
-        schema.isAdvanced = isAdvanced;
+        fieldsIsAdvancedMap[schema.field] = isAdvanced;
       }
     }
 
@@ -159,12 +154,12 @@ export default function ({
 
     getAdvanced(unref(getProps).actionColOptions || { span: BASIC_COL_LEN }, itemColSum, true);
 
-    emit('advanced-change');
+    emit('advanced-change', advanceState.isAdvanced);
   }
 
   function handleToggleAdvanced() {
     advanceState.isAdvanced = !advanceState.isAdvanced;
   }
 
-  return { handleToggleAdvanced };
+  return { handleToggleAdvanced, fieldsIsAdvancedMap };
 }

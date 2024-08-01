@@ -1,8 +1,11 @@
 export function checkFileType(file: File, accepts: string[]) {
-  const newTypes = accepts.join('|');
-  // const reg = /\.(jpg|jpeg|png|gif|txt|doc|docx|xls|xlsx|xml)$/i;
-  const reg = new RegExp('\\.(' + newTypes + ')$', 'i');
-
+  let reg;
+  if (!accepts || accepts.length === 0) {
+    reg = /.(jpg|jpeg|png|gif|webp)$/i;
+  } else {
+    const newTypes = accepts.join('|');
+    reg = new RegExp('\\.(' + newTypes + ')$', 'i');
+  }
   return reg.test(file.name);
 }
 
@@ -11,7 +14,7 @@ export function checkImgType(file: File) {
 }
 
 export function isImgTypeByName(name: string) {
-  return /\.(jpg|jpeg|png|gif)$/i.test(name);
+  return /\.(jpg|jpeg|png|gif|webp)$/i.test(name);
 }
 
 export function getBase64WithFile(file: File) {

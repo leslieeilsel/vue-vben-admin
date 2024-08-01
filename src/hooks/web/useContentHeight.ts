@@ -1,9 +1,8 @@
+import { useLayoutHeight } from '@/layouts/default/content/useContentViewHeight';
+import { getViewportOffset } from '@/utils/domUtils';
+import { isNumber, isString } from '@/utils/is';
+import { onMountedOrActivated, useWindowSizeFn } from '@vben/hooks';
 import { ComputedRef, isRef, nextTick, Ref, ref, unref, watch } from 'vue';
-import { onMountedOrActivated } from '/@/hooks/core/onMountedOrActivated';
-import { useWindowSizeFn } from '/@/hooks/event/useWindowSizeFn';
-import { useLayoutHeight } from '/@/layouts/default/content/useContentViewHeight';
-import { getViewportOffset } from '/@/utils/domUtils';
-import { isNumber, isString } from '/@/utils/is';
 
 export interface CompensationHeight {
   // 使用 layout Footer 高度作为判断补偿高度的条件
@@ -21,7 +20,7 @@ type Upward = number | string | null | undefined;
  * @param flag 用于开启计算的响应式标识
  * @param anchorRef 锚点组件 Ref<ElRef | ComponentRef>
  * @param subtractHeightRefs 待减去高度的组件列表 Ref<ElRef | ComponentRef>
- * @param substractSpaceRefs 待减去空闲空间(margins/paddings)的组件列表 Ref<ElRef | ComponentRef>
+ * @param subtractSpaceRefs 待减去空闲空间(margins/paddings)的组件列表 Ref<ElRef | ComponentRef>
  * @param offsetHeightRef 计算偏移的响应式高度，计算高度时将直接减去此值
  * @param upwardSpace 向上递归减去空闲空间的 层级 或 直到指定class为止 数值为2代表向上递归两次|数值为ant-layout表示向上递归直到碰见.ant-layout为止
  * @returns 响应式高度
@@ -30,7 +29,7 @@ export function useContentHeight(
   flag: ComputedRef<Boolean>,
   anchorRef: Ref,
   subtractHeightRefs: Ref[],
-  substractSpaceRefs: Ref[],
+  subtractSpaceRefs: Ref[],
   upwardSpace: Ref<Upward> | ComputedRef<Upward> | Upward = 0,
   offsetHeightRef: Ref<number> = ref(0),
 ) {
@@ -101,16 +100,16 @@ export function useContentHeight(
     }
     const { bottomIncludeBody } = getViewportOffset(anchorEl);
 
-    // substract elements height
-    let substractHeight = 0;
+    // subtract elements height
+    let subtractHeight = 0;
     subtractHeightRefs.forEach((item) => {
-      substractHeight += getEl(unref(item))?.offsetHeight ?? 0;
+      subtractHeight += getEl(unref(item))?.offsetHeight ?? 0;
     });
 
     // subtract margins / paddings
-    let substractSpaceHeight = calcSubtractSpace(anchorEl) ?? 0;
-    substractSpaceRefs.forEach((item) => {
-      substractSpaceHeight += calcSubtractSpace(getEl(unref(item)));
+    let subtractSpaceHeight = calcSubtractSpace(anchorEl) ?? 0;
+    subtractSpaceRefs.forEach((item) => {
+      subtractSpaceHeight += calcSubtractSpace(getEl(unref(item)));
     });
 
     // upwardSpace
@@ -145,8 +144,8 @@ export function useContentHeight(
       bottomIncludeBody -
       unref(layoutFooterHeightRef) -
       unref(offsetHeightRef) -
-      substractHeight -
-      substractSpaceHeight -
+      subtractHeight -
+      subtractSpaceHeight -
       upwardSpaceHeight;
 
     // compensation height
@@ -173,8 +172,7 @@ export function useContentHeight(
     () => {
       calcContentHeight();
     },
-    50,
-    { immediate: true },
+    { wait: 50, immediate: true },
   );
   watch(
     () => [layoutFooterHeightRef.value],

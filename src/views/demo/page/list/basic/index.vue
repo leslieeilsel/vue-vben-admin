@@ -1,27 +1,27 @@
 <template>
   <PageWrapper :class="prefixCls" title="标准列表">
     <div :class="`${prefixCls}__top`">
-      <a-row :gutter="12">
-        <a-col :span="8" :class="`${prefixCls}__top-col`">
+      <Row :gutter="12">
+        <Col :span="8" :class="`${prefixCls}__top-col`">
           <div>我的待办</div>
           <p>8个任务</p>
-        </a-col>
-        <a-col :span="8" :class="`${prefixCls}__top-col`">
+        </Col>
+        <Col :span="8" :class="`${prefixCls}__top-col`">
           <div>本周任务平均处理时间</div>
           <p>32分钟</p>
-        </a-col>
-        <a-col :span="8" :class="`${prefixCls}__top-col`">
+        </Col>
+        <Col :span="8" :class="`${prefixCls}__top-col`">
           <div>本周完成任务数</div>
           <p>24个任务</p>
-        </a-col>
-      </a-row>
+        </Col>
+      </Row>
     </div>
 
     <div :class="`${prefixCls}__content`">
-      <a-list :pagination="pagination">
-        <template v-for="item in list" :key="item.id">
-          <a-list-item class="list">
-            <a-list-item-meta>
+      <List :pagination="pagination">
+        <template v-for="item in cardList" :key="item.id">
+          <List.Item class="list">
+            <List.Item.Meta>
               <template #avatar>
                 <Icon class="icon" v-if="item.icon" :icon="item.icon" :color="item.color" />
               </template>
@@ -43,50 +43,32 @@
                   <Progress :percent="item.percent" status="active" />
                 </div>
               </template>
-            </a-list-item-meta>
-          </a-list-item>
+            </List.Item.Meta>
+          </List.Item>
         </template>
-      </a-list>
+      </List>
     </div>
   </PageWrapper>
 </template>
-<script lang="ts">
-  import { Progress, Row, Col } from 'ant-design-vue';
-  import { defineComponent } from 'vue';
-  import Icon from '/@/components/Icon/index';
+<script lang="ts" setup>
+  import { Progress, Row, Col, List } from 'ant-design-vue';
+  import Icon from '@/components/Icon/Icon.vue';
   import { cardList } from './data';
-  import { PageWrapper } from '/@/components/Page';
-  import { List } from 'ant-design-vue';
+  import { PageWrapper } from '@/components/Page';
 
-  export default defineComponent({
-    components: {
-      Icon,
-      Progress,
-      PageWrapper,
-      [List.name]: List,
-      [List.Item.name]: List.Item,
-      AListItemMeta: List.Item.Meta,
-      [Row.name]: Row,
-      [Col.name]: Col,
-    },
-    setup() {
-      return {
-        prefixCls: 'list-basic',
-        list: cardList,
-        pagination: {
-          show: true,
-          pageSize: 3,
-        },
-      };
-    },
-  });
+  const prefixCls = 'list-basic';
+
+  const pagination = {
+    show: true,
+    pageSize: 3,
+  };
 </script>
 <style lang="less" scoped>
   .list-basic {
     &__top {
       padding: 24px;
-      text-align: center;
       background-color: @component-background;
+      text-align: center;
 
       &-col {
         &:not(:last-child) {
@@ -95,23 +77,23 @@
 
         div {
           margin-bottom: 12px;
+          color: @text-color-base;
           font-size: 14px;
           line-height: 22px;
-          color: @text-color;
         }
 
         p {
           margin: 0;
+          color: @text-color-base;
           font-size: 24px;
           line-height: 32px;
-          color: @text-color;
         }
       }
     }
 
     &__content {
-      padding: 24px;
       margin-top: 12px;
+      padding: 24px;
       background-color: @component-background;
 
       .list {
@@ -126,8 +108,8 @@
         position: absolute;
         top: 20px;
         right: 15px;
-        font-weight: normal;
         color: @primary-color;
+        font-weight: normal;
         cursor: pointer;
       }
 
